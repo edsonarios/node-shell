@@ -1,0 +1,30 @@
+{
+  "author": "",
+  "dependencies": {
+    "keypress": "^0.2.1",
+    "prompts": "^2.4.2",
+    "readline": "^1.3.0"
+  },
+  "description": "",
+  "devDependencies": {
+    "standard": "^17.1.0"
+  },
+  "eslintConfig": {
+    "extends": "standard",
+    "rules": {
+      "indent": [
+        "error",
+        4
+      ]
+    }
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "shell-cli",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}
