@@ -1,26 +1,23 @@
-const readline = require('readline')
-const keypress = require('keypress')
-const { exec } = require('child_process')
-const { getSuggestion } = require('./src/suggestion')
+import { theme } from './src/themes/default.js'
+import readline from 'readline'
+import keypress from 'keypress'
+import { exec } from 'child_process'
+import { getSuggestion } from './src/suggestion.js'
+import { clearLastLine } from './src/utils.js'
 
 let currentInput = ''
 let suggestion = ''
-const completeCommands = ['cd proyecto', 'ls -la', 'mkdir carpeta', 'npm start', 'cd otro']
-const header = '>_ '
-let currentDirectory = ''
+const completeCommands = ['cd proyect', 'ls -la', 'mkdir carpeta', 'npm start', 'cd otro']
+let prompt = ''
+
 // Init config
 keypress(process.stdin)
 process.stdin.setRawMode(true)
 process.stdin.resume()
 
 function displayPrompt () {
-    currentDirectory = process.cwd()
-    process.stdout.write(currentDirectory + header + currentInput)
-}
-
-function clearLastLine () {
-    process.stdout.cursorTo(0)
-    process.stdout.clearLine()
+    prompt = theme()
+    process.stdout.write(prompt + currentInput)
 }
 
 function endRunCommand () {
@@ -28,32 +25,7 @@ function endRunCommand () {
     displayPrompt()
 }
 
-function handleCD (command) {
-    try {
-        process.chdir(command.slice(3).trim())
-        process.stdout.write('\n')
-        endRunCommand()
-    } catch (error) {
-        console.error(`Error: ${error.message}`)
-    }
-}
-
-async function handleCommandExecution (command) {
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            process.stdout.write(`\nError ejecutando el comando: ${error.message}`)
-        }
-        if (stdout || stdout.length === 0) {
-            process.stdout.write('\n' + stdout)
-            endRunCommand()
-        }
-        if (stderr) {
-            // console.error(stderr);
-        }
-    })
-}
-
-async function handleKeyPress (ch, key) {
+function handleKeyPress (ch, key) {
     if (key && key.ctrl && key.name === 'c') {
         process.exit()
     }
@@ -73,16 +45,41 @@ async function handleKeyPress (ch, key) {
     suggestion = getSuggestion(completeCommands, currentInput)
     if (suggestion && currentInput.length !== 0) {
         process.stdout.write('\x1b[36m' + suggestion + '\x1b[0m')
-        process.stdout.cursorTo(currentInput.length + currentDirectory.length + header.length)
+        process.stdout.cursorTo(prompt.length + currentInput.length)
     }
 
     if (key && key.name === 'return') {
         if (currentInput.startsWith('cd ')) {
             handleCD(currentInput)
         } else {
-            await handleCommandExecution(currentInput)
+            handleCommandExecution(currentInput)
         }
     }
+}
+
+function handleCD (command) {
+    try {
+        process.chdir(command.slice(3).trim())
+        process.stdout.write('\n')
+        endRunCommand()
+    } catch (error) {
+        console.error(`Error: ${error.message}`)
+    }
+}
+
+function handleCommandExecution (command) {
+    exec(command, (error, stdout, stderr) => {
+        if (error) {
+            process.stdout.write(`\nError ejecutando el comando: ${error.message}`)
+        }
+        if (stdout || stdout.length === 0) {
+            process.stdout.write('\n' + stdout)
+            endRunCommand()
+        }
+        if (stderr) {
+            // console.error(stderr);
+        }
+    })
 }
 
 process.stdin.on('keypress', handleKeyPress)
