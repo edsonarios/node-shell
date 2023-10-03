@@ -1,9 +1,9 @@
-import { theme } from './src/themes/default.js'
 import readline from 'readline'
 import keypress from 'keypress'
 import { exec } from 'child_process'
 import { getSuggestion } from './src/suggestion.js'
 import { clearLastLine } from './src/utils.js'
+import { config } from './config.js'
 
 let currentInput = ''
 let suggestion = ''
@@ -15,8 +15,26 @@ keypress(process.stdin)
 process.stdin.setRawMode(true)
 process.stdin.resume()
 
+let themeFunction
+
+async function loadTheme () {
+    try {
+        const themeModule = await import(`./src/themes/${config.activeTheme}.js`)
+        themeFunction = themeModule.theme
+        displayPrompt()
+    } catch (error) {
+        console.error('default theme loaded')
+        const themeModule = await import('./src/themes/default.js')
+        themeFunction = themeModule.theme
+        displayPrompt()
+    }
+}
+
 function displayPrompt () {
-    prompt = theme()
+    if (!themeFunction) {
+        return
+    }
+    prompt = themeFunction()
     process.stdout.write(prompt + currentInput)
 }
 
@@ -92,4 +110,4 @@ readline.createInterface({
     process.exit(0)
 })
 
-displayPrompt()
+loadTheme()
