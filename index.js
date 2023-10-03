@@ -56,6 +56,10 @@ function handleKeyPress (ch, key) {
     if (key && key.ctrl && key.name === 'u') {
         currentInput = ''
     }
+    if (key && key.ctrl && key.name === 'l') {
+        handleCommandExecution('clear')
+        currentInput = ''
+    }
 
     clearLastLine()
     displayPrompt()
